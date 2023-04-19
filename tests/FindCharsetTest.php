@@ -2,52 +2,55 @@
 
 namespace Spekulatius\PHPScraper\Tests;
 
-class MetaContentTypeTest extends \PHPUnit\Framework\TestCase
+class FindCharsetTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @test
      */
-    public function testMissingContentType()
+    public function testMissingCharset()
     {
         $web = new \Spekulatius\PHPScraper\PHPScraper;
 
         // Navigate to the test page.
         $web->go('https://test-pages.phpscraper.de/meta/missing.html');
 
-        // Check the contentType as not given (null)
-        $this->assertNull($web->contentType);
+        // Check the charset as not given (null)
+        $this->assertNull($web->findCharset());
     }
 
     /**
-     * @dataProvider contentTypeProvider
+     * @dataProvider charsetProvider
      * @test
      */
-    public function testWithContentType($uri, $expected)
+    public function testWithCharset($uri, $expected)
     {
         $web = new \Spekulatius\PHPScraper\PHPScraper;
 
         // Navigate to the test page.
         $web->go($uri);
 
-        // Check the contentType
+        // Check the charset
         $this->assertSame(
             $expected,
-            $web->contentType
+            $web->findCharset()
         );
     }
 
-    private function contentTypeProvider(): array
+    private function charsetProvider(): array
     {
         return [
-            'Content-Type' => [
+            'content-type' => [
                 'uri' => 'https://www.smfcorp.net/mtg-funcards-17214-shoggoth-bloqueur.html',
-                'expected' => 'text/html; charset=iso-8859-1',
+                'expected' => 'iso-8859-1',
             ],
-            'Content-type' => [
+            'charset and content-type' => [
                 'uri' => 'https://test-pages.phpscraper.de/meta/lorem-ipsum.html',
-                'expected' => 'text/html; charset=utf-8',
+                'expected' => 'utf-8',
             ],
-
+            'charset' => [
+                'uri' => 'https://test-pages.phpscraper.de/meta/lorem-ipsum-spaces.html',
+                'expected' => 'utf-8',
+            ],
         ];
     }
 }
