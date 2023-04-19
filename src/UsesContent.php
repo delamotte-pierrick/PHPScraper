@@ -32,7 +32,22 @@ trait UsesContent
 
     public function contentType(): ?string
     {
-        return $this->filterFirstExtractAttribute('//meta[@http-equiv="Content-type"]', ['content']);
+        $equivs = [
+            'content-type',
+            'Content-Type',
+            'Content-type',
+            'content-Type',
+            'CONTENT-TYPE',
+        ];
+
+        foreach ($equivs as $equiv) {
+            $content = $this->filterFirstExtractAttribute("//meta[@http-equiv=\"{$equiv}\"]", ['content']);
+            if ($content) {
+                return $content;
+            }
+        }
+
+        return null;
     }
 
     public function canonical(): ?string
@@ -58,6 +73,18 @@ trait UsesContent
     public function baseHref(): ?string
     {
         return $this->filterFirstExtractAttribute('//base', ['href']);
+    }
+
+    public function findCharset(): ?string
+    {
+        $charset = $this->charset();
+        if ($charset !== null) {
+            return $charset;
+        }
+
+        preg_match('/charset=[\'\"]?(.*)[\'\"]?/', $this->contentType(), $matches);
+
+        return $matches[1] ?? null;
     }
 
     /**
